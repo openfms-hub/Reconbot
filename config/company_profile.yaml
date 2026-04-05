@@ -1,0 +1,63 @@
+# ============================================================
+# 我方公司 Profile — 用于合作潜力匹配分析
+# ============================================================
+
+company:
+  name: "FleetGoo"
+  website: "https://www.fleetgoo.com"
+  industry: "商用车队车载智能硬件 + 软件平台"
+  target_market: "海外市场，重点拉丁美洲（墨西哥为桥头堡）"
+  team_size: 2
+  annual_target: "500万人民币"
+
+  # 产品线
+  products:
+    - name: "D401"
+      category: "AI DMS Camera"
+      description: "1080P, >100dB WDR, 需连接主机"
+
+    - name: "D501"
+      category: "2CH 4G DashCam"
+      description: "1080P+720P IR, 128GB TF, 9-30V"
+
+    - name: "D604"
+      category: "4-8CH MDVR/AI Box"
+      description: "DMS+ADAS+BSD, 0.5 TOPS, H.265, 双TF 512GB, -20~70℃"
+
+    - name: "D701 Pro"
+      category: "2+1CH 4G DashCam"
+      description: "双1080P H.265, DMS+ADAS, TF 512GB, 9-36V宽压, 防盗锁, <2W低功耗"
+
+    - name: "D901"
+      category: "BSD 智能相机"
+      description: "4路AHD, 10.1\" IPS触控屏, BSD+燃油防盗+AI语音, 12-36V"
+
+  # 平台能力
+  platform:
+    name: "FleetGoo Platform"
+    pricing: "免费或极低费用"
+    features:
+      - "RESTful API"
+      - "AES-256 + SSO + RBAC"
+      - "JT/T 808/794/1076/1078/905 全部标兼容"
+      - "Web + PC + App + 小程序"
+
+  # 核心竞争优势
+  advantages:
+    - "TCO碾压: 硬件买断 + 平台免费 (vs 竞品月费订阅)"
+    - "BSD盲区检测: D604/D901独有能力"
+    - "H.265: 省40%流量成本"
+    - "部标JT/T全兼容: 政企项目独占优势"
+    - "买断制无订阅绑定: 分销商友好"
+
+  # 定价模式
+  pricing_model: "硬件一次性买断 + 平台免费/极低费用"
+
+  # 合作模式偏好
+  partnership_preferences:
+    - type: "分销商/经销商"
+      description: "目标公司采购硬件后自行服务终端客户"
+    - type: "系统集成商"
+      description: "目标公司将FleetGoo硬件集成到其平台方案中"
+    - type: "OEM/贴牌"
+      description: "目标公司以自有品牌销售FleetGoo硬件"

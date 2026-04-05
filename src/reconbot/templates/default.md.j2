@@ -1,0 +1,34 @@
+# {{ company_name }} — 公司调研报告
+
+> **调研时间**: {{ generated_at }}
+
+> **调研目的**: 评估 {{ company_name }} 与 {{ our_company_name }} 的合作潜力
+
+> **调研工具**: ReconBot v0.1.0
+
+> **信息来源**: {% for source, info in collector_summary.items() %}{% if info.success %}{{ source }}{% if not loop.last %}、{% endif %}{% endif %}{% endfor %}
+
+---
+
+{{ company_profile_analysis }}
+
+---
+
+## 与 {{ our_company_name }} 合作潜力分析
+
+{{ partnership_analysis }}
+
+---
+
+## 附录：数据源概况
+
+| 数据源 | 状态 | 采集数据段数 | 来源URL数 |
+|--------|------|-------------|----------|
+{% for source, info in collector_summary.items() -%}
+| {{ source }} | {{ "✅ 成功" if info.success else "❌ 失败: " + info.error }} | {{ info.text_count }} 段 | {{ info.url_count }} 条 |
+{% endfor %}
+
+---
+
+*本报告由 ReconBot 自动生成，基于公开信息分析，仅供商业决策参考。*
+*数据截止：{{ generated_at }}*

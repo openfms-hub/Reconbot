@@ -1,0 +1,27 @@
+[project]
+name = "reconbot"
+version = "0.1.0"
+description = "Automated company research & partnership analysis CLI tool"
+readme = "README.md"
+authors = [
+    { name = "whsheng", email = "1102@mapgoo.net" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "typer>=0.15.0",
+    "rich>=13.0.0",
+    "litellm>=1.60.0",
+    "httpx>=0.28.0",
+    "beautifulsoup4>=4.12.0",
+    "pyyaml>=6.0",
+    "jinja2>=3.1.0",
+    "exa-py>=1.0.0",
+    "tavily-python>=0.5.0",
+]
+
+[project.scripts]
+reconbot = "reconbot.cli:app"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

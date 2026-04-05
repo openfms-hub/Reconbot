@@ -1,0 +1,50 @@
+# ============================================================
+# ReconBot 全局配置 — 复制为 settings.yaml 并填入你的 API Key
+# ============================================================
+
+# --- LLM 配置 ---
+llm:
+  default_model: "openai/qwen-plus"
+
+  providers:
+    dashscope:
+      api_key: "${DASHSCOPE_API_KEY}"
+      api_base: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    moonshot:
+      api_key: "${MOONSHOT_API_KEY}"
+      api_base: "https://api.moonshot.cn/v1"
+    deepseek:
+      api_key: "${DEEPSEEK_API_KEY}"
+      api_base: "https://api.deepseek.com/v1"
+
+  temperature: 0.3
+  max_tokens: 8192
+
+# --- 搜索引擎配置 ---
+collectors:
+  website:
+    enabled: true
+    timeout: 30
+    max_pages: 10
+
+  exa:
+    enabled: true
+    api_key: "${EXA_API_KEY}"
+    num_results: 10
+
+  tavily:
+    enabled: true
+    api_key: "${TAVILY_API_KEY}"
+    max_results: 10
+
+  google:
+    enabled: false
+    api_key: "${GOOGLE_SEARCH_API_KEY}"
+    cx: "${GOOGLE_SEARCH_CX}"
+    num_results: 10
+
+# --- 输出配置 ---
+output:
+  dir: "./reports"
+  language: "zh"
+  template: "default"
