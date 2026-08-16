@@ -1,0 +1,18 @@
+{
+  "identifier": "default",
+  "description": "ReconBot GUI capabilities",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "shell:allow-open",
+    "fs:allow-read-files",
+    "fs:allow-write-files",
+    "fs:allow-read-dir",
+    "fs:allow-mkdir",
+    "fs:allow-remove",
+    "dialog:allow-open",
+    "dialog:allow-save",
+    "dialog:allow-message",
+    "process:allow-exit"
+  ]
+}

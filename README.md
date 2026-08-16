@@ -358,6 +358,46 @@ reconbot/
 └── pyproject.toml
 ```
 
+## 桌面应用（Tauri）
+
+ReconBot 提供基于 Tauri 的桌面 GUI 应用，无需命令行操作，双击即可使用。
+
+### 运行开发模式
+
+```bash
+# 前置要求: Rust (rustup), Tauri CLI
+source ~/.cargo/env
+cd src-tauri
+cargo tauri dev
+```
+
+### 打包发布
+
+```bash
+cd src-tauri
+cargo tauri build
+```
+
+产物位于 `src-tauri/target/release/bundle/`（macOS: `.dmg`, Windows: `.msi`, Linux: `.deb`）。
+
+### 目录结构
+
+```
+src-tauri/
+├── frontend/            # HTML/CSS/JS 前端
+│   ├── index.html
+│   ├── style.css
+│   └── app.js
+├── src/
+│   ├── main.rs          # Tauri 入口
+│   └── lib.rs           # 桥接命令（list_reports, do_research 等）
+├── tauri.conf.json      # Tauri 配置
+├── Cargo.toml
+└── capabilities/
+```
+
+---
+
 ## 技术栈
 
 - Python 3.12+

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>ReconBot</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2>📋 历史记录</h2>
+            <input type="text" id="search-input" placeholder="搜索公司名..." />
+        </div>
+        <div id="history-list" class="history-list">
+            <div class="history-empty">暂无调研记录</div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-bar">
+            <div class="top-bar-left">
+                <h1>🔍 ReconBot</h1>
+                <span class="version">v0.1.0</span>
+            </div>
+            <div class="top-bar-right">
+                <button class="btn btn-sm" id="btn-config" title="配置">⚙️ 配置</button>
+            </div>
+        </header>
+
+        <section class="input-section">
+            <div class="input-row">
+                <div class="input-group">
+                    <label>公司名称 *</label>
+                    <input type="text" id="company" placeholder="如：Vectro Rastreo Vehicular" />
+                </div>
+                <div class="input-group">
+                    <label>国家</label>
+                    <input type="text" id="country" placeholder="如：Mexico" />
+                </div>
+                <div class="input-group">
+                    <label>城市</label>
+                    <input type="text" id="city" placeholder="如：Guadalajara" />
+                </div>
+            </div>
+            <div class="input-row">
+                <div class="input-group">
+                    <label>官网 URL</label>
+                    <input type="text" id="website" placeholder="如：https://www.vectro.com.mx" />
+                </div>
+                <div class="input-group">
+                    <label>电话</label>
+                    <input type="text" id="phone" placeholder="+52 33 3635 4809" />
+                </div>
+                <div class="input-group">
+                    <label>邮箱</label>
+                    <input type="text" id="email" placeholder="contact@example.com" />
+                </div>
+            </div>
+            <div class="input-row">
+                <div class="input-group">
+                    <label>行业</label>
+                    <input type="text" id="industry" placeholder="如：车队追踪" />
+                </div>
+                <div class="input-group">
+                    <label>模型</label>
+                    <input type="text" id="model" placeholder="如：dots/dots3-note-prev" />
+                </div>
+                <div class="input-group action-group">
+                    <label>&nbsp;</label>
+                    <button class="btn btn-primary" id="btn-research">▶ 开始调研</button>
+                </div>
+            </div>
+        </section>
+
+        <div id="progress-panel" class="progress-panel hidden">
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div class="progress-text" id="progress-text">准备中...</div>
+            <button class="btn btn-sm btn-cancel" id="btn-cancel">取消</button>
+        </div>
+
+        <section class="report-section">
+            <div class="report-header">
+                <h2>📄 调研报告</h2>
+                <div class="report-actions">
+                    <button class="btn btn-sm" id="btn-export-pdf" title="导出 PDF">📄 PDF</button>
+                    <button class="btn btn-sm" id="btn-export-md" title="导出 Markdown">📝 Markdown</button>
+                    <button class="btn btn-sm" id="btn-copy" title="复制到剪贴板">📋 复制</button>
+                    <button class="btn btn-sm btn-danger" id="btn-delete" title="删除报告">🗑️</button>
+                </div>
+            </div>
+            <div id="report-content" class="report-content">
+                <div class="report-placeholder">
+                    <p>输入目标公司信息并点击「开始调研」</p>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<!-- Modal: Config -->
+<div id="config-modal" class="modal hidden">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>⚙️ 配置</h3>
+            <button class="modal-close" id="modal-close">×</button>
+        </div>
+        <div class="modal-body">
+            <p class="config-note">编辑 <code>config/settings.yaml</code> 配置 LLM API Key 和采集器。</p>
+            <pre class="config-pre" id="config-content">加载中...</pre>
+        </div>
+        <div class="modal-footer">
+            <button class="btn" id="btn-config-open">打开配置目录</button>
+            <button class="btn btn-primary" id="btn-config-close">关闭</button>
+        </div>
+    </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

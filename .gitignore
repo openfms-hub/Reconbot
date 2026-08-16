@@ -17,3 +17,12 @@ config/settings.yaml
 
 # Fabric internal
 .pi/
+
+# Tauri build artifacts
+src-tauri/target/
+src-tauri/tauri.conf.json.bak
+*.dmg
+*.msi
+*.deb
+*.AppImage
+*.rpm
