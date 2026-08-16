@@ -23,7 +23,7 @@ jobs:
           toolchain: stable
 
       - name: Install Tauri CLI
-        run: cargo install tauri-cli --version "^2.0"  --locked
+        run: cargo install tauri-cli --version "^2.0" --locked
 
       - name: Install OpenSSL (for rust-openssl)
         run: |
@@ -36,6 +36,21 @@ jobs:
           source .venv/bin/activate
           pip install -r requirements.txt -q
           pip install -e . -q
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install frontend dependencies
+        run: |
+          cd src-tauri/frontend
+          npm install
+
+      - name: Build frontend
+        run: |
+          cd src-tauri/frontend
+          npm run build
 
       - name: Build Tauri app
         env:
