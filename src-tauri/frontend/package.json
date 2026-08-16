@@ -1,0 +1,10 @@
+{
+  "name": "reconbot-desktop",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build": "echo 'no build step needed - static HTML/CSS/JS'"
+  },
+  "devDependencies": {}
+}
