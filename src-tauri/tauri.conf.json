@@ -4,9 +4,7 @@
   "version": "0.1.0",
   "identifier": "com.reconbot.app",
   "build": {
-    "frontendDist": "frontend",
-    "devUrl": "http://localhost:1420",
-    "beforeDevCommand": "python3 -m http.server 1420 --directory frontend"
+    "frontendDist": "frontend"
   },
   "app": {
     "windows": [
@@ -17,7 +15,8 @@
         "height": 800,
         "minWidth": 1000,
         "minHeight": 600,
-        "resizable": true
+        "resizable": true,
+        "path": "index.html"
       }
     ],
     "security": {

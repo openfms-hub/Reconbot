@@ -26,8 +26,8 @@ jobs:
         with:
           targets: aarch64-apple-darwin,x86_64-apple-darwin
 
-      - name: Install frontend dependencies
-        run: cd src-tauri/frontend && npm install
+      - name: Install Tauri CLI
+        run: cd src-tauri && npm install
 
       - name: Build Tauri app
         uses: tauri-apps/tauri-action@action-v1.0.0

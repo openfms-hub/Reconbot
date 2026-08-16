@@ -4,7 +4,9 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "build": "echo 'no build step needed - static HTML/CSS/JS'"
+    "build": "echo 'no build step needed'"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "@tauri-apps/cli": "^2"
+  }
 }
