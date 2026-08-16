@@ -23,7 +23,7 @@ jobs:
           toolchain: stable
 
       - name: Install Tauri CLI
-        run: cargo install tauri-cli --version 2.x
+        run: cargo install tauri --version 2.x --locked
 
       - name: Install OpenSSL (for rust-openssl)
         run: |
