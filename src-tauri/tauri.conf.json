@@ -4,10 +4,10 @@
   "version": "0.1.0",
   "identifier": "com.reconbot.app",
   "build": {
-    "frontendDist": "../dist",
+    "frontendDist": "frontend",
     "devUrl": "http://localhost:1420",
-    "beforeDevCommand": "python3 -m http.server 1420 --directory ../src-tauri/frontend",
-    "beforeBuildCommand": "mkdir -p ../dist && cp -r ../src-tauri/frontend/* ../dist/"
+    "beforeDevCommand": "python3 -m http.server 1420 --directory frontend",
+    "beforeBuildCommand": "mkdir -p frontend && echo 'Frontend already exists'"
   },
   "app": {
     "windows": [
