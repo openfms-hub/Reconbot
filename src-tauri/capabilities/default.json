@@ -1,18 +1,19 @@
 {
+  "version": 1,
   "identifier": "default",
-  "description": "ReconBot GUI capabilities",
+  "description": "Capability for default app permissions",
   "windows": ["main"],
   "permissions": [
     "core:default",
+    "core:app:default",
+    "core:window:default",
+    "core:app:allow-app-hide",
+    "core:app:allow-app-show",
     "shell:allow-open",
     "fs:allow-read-files",
+    "fs:allow-read-dirs",
     "fs:allow-write-files",
-    "fs:allow-read-dir",
-    "fs:allow-mkdir",
-    "fs:allow-remove",
-    "dialog:allow-open",
-    "dialog:allow-save",
-    "dialog:allow-message",
-    "process:allow-exit"
+    "fs:allow-write-dirs",
+    "dialog:allow-open"
   ]
 }
