@@ -2,25 +2,22 @@
   "$schema": "https://raw.githubusercontent.com/tauri-apps/tauri/dev/crates/tauri-config-schema/schema.json",
   "productName": "ReconBot",
   "version": "0.1.0",
-  "identifier": "com.reconbot",
+  "identifier": "com.reconbot.app",
   "build": {
     "frontendDist": "frontend",
     "devUrl": "http://localhost:1420",
-    "beforeDevCommand": "python3 -m http.server 1420 --directory frontend",
-    "beforeBuildCommand": "mkdir -p frontend && echo 'Frontend already exists'"
+    "beforeDevCommand": "python3 -m http.server 1420 --directory frontend"
   },
   "app": {
     "windows": [
       {
         "label": "main",
         "title": "ReconBot",
-        "url": "index.html",
         "width": 1200,
         "height": 800,
         "minWidth": 1000,
         "minHeight": 600,
-        "resizable": true,
-        "decorations": true
+        "resizable": true
       }
     ],
     "security": {
@@ -30,6 +27,9 @@
   "bundle": {
     "active": true,
     "targets": "all",
-    "icon": []
+    "icon": [],
+    "macOS": {
+      "minimumSystemVersion": "10.13"
+    }
   }
 }
