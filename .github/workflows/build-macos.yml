@@ -1,0 +1,56 @@
+name: Build macOS .dmg
+
+on:
+  push:
+    branches: [feat/tauri-desktop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build ReconBot Desktop (macOS)
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-action@stable
+        with:
+          toolchain: stable
+
+      - name: Install Tauri CLI
+        run: cargo install tauri-cli --version 2.x
+
+      - name: Install OpenSSL (for rust-openssl)
+        run: |
+          brew install openssl@3
+          echo "OPENSSL_DIR=$(brew --prefix openssl@3)" >> $GITHUB_ENV
+
+      - name: Install Python deps (for do_research)
+        run: |
+          python3 -m venv .venv
+          source .venv/bin/activate
+          pip install -r requirements.txt -q
+          pip install -e . -q
+
+      - name: Build Tauri app
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          TAURI_SIGNING_KEY: ${{ secrets.TAURI_SIGNING_KEY }}
+        run: |
+          cd src-tauri
+          OPENSSL_DIR=$(brew --prefix openssl@3) cargo tauri build
+
+      - name: Upload .dmg
+        uses: actions/upload-artifact@v4
+        with:
+          name: ReconBot-macOS
+          path: src-tauri/target/release/bundle/dmg/*.dmg
+          if-no-files-found: error
+          retention-days: 14

@@ -1,8 +1,17 @@
 /* ReconBot Desktop — Main Application */
 
-const { invoke } = window.__TAURI__?.core || window;
-const { shell } = window.__TAURI__?.shell || {};
-const { dialog } = window.__TAURI__?.dialog || {};
+// Tauri v2 global API (no npm deps needed)
+const invoke = (cmd, args) => window.__TAURI__.core.invoke(cmd, args);
+const shell = {
+    open: (path) => window.__TAURI__.shell.open(path),
+    writeTextFile: async (path, content) => {
+        // Use Tauri fs plugin via invoke
+        await invoke('write_file', { path, content });
+    },
+};
+const dialog = {
+    open: (opts) => window.__TAURI__.dialog.open(opts),
+};
 
 // ── DOM refs ──
 const $ = (sel) => document.querySelector(sel);
@@ -22,7 +31,8 @@ function escapeHtml(s) {
 
 // ── History ──
 async function loadHistory(filter = '') {
-    const reports = await invoke('list_reports');
+    let reports = await invoke('list_reports');
+    if (!reports) reports = [];
     const filtered = reports.filter(r => r.name.toLowerCase().includes(filter.toLowerCase()));
     state.reports = filtered;
 
@@ -121,16 +131,14 @@ async function doResearch() {
     try {
         const model = $('#model').value.trim();
         const result = await invoke('do_research', {
-            input: {
-                company: company,
-                website: $('#website').value.trim(),
-                country: $('#country').value.trim(),
-                city: $('#city').value.trim(),
-                phone: $('#phone').value.trim(),
-                email: $('#email').value.trim(),
-                industry: $('#industry').value.trim(),
-                model: model,
-            },
+            company: company,
+            website: $('#website').value.trim(),
+            country: $('#country').value.trim(),
+            city: $('#city').value.trim(),
+            phone: $('#phone').value.trim(),
+            email: $('#email').value.trim(),
+            industry: $('#industry').value.trim(),
+            model: model,
         });
 
         $('#progress-bar').style.width = '100%';
