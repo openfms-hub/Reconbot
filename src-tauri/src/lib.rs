@@ -1,5 +1,5 @@
 use std::process::{Command, Stdio};
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::fs;
 use serde::{Serialize, Deserialize};
 
@@ -22,12 +22,16 @@ struct ReportMeta {
     date: String,
 }
 
-/// Extract YYYY-MM-DD from filename like "Company_调研报告_20260816.md"
+/// Extract YYYY-MM-DD from any part of the filename.
+/// Handles formats like "Company_20260816_China.md" or "Company_调研报告_20260816.md"
 fn extract_date(filename: &str) -> String {
-    let parts: Vec<&str> = filename.split('_').collect();
-    if let Some(last) = parts.last() {
-        if last.len() == 8 && last.chars().all(|c| c.is_ascii_digit()) {
-            return format!("{}-{}-{}", &last[0..4], &last[4..6], &last[6..8]);
+    for part in filename.split('_') {
+        if part.len() == 8 && part.chars().all(|c| c.is_ascii_digit()) {
+            if let (Ok(y), Ok(m), Ok(d)) = (part[0..4].parse::<u16>(), part[4..6].parse::<u16>(), part[6..8].parse::<u16>()) {
+                if y >= 2020 && y <= 2030 && m >= 1 && m <= 12 && d >= 1 && d <= 31 {
+                    return format!("{}-{}-{}", y, m, d);
+                }
+            }
         }
     }
     "unknown".to_string()
@@ -36,28 +40,29 @@ fn extract_date(filename: &str) -> String {
 #[tauri::command]
 fn get_app_root() -> String {
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .parent().unwrap_or(Path::new("."))
-        .to_str().unwrap_or(".")
-        .to_string();
+        .parent()
+        .map(|p| p.to_str().unwrap_or(".").to_string())
+        .unwrap_or(".".to_string());
     root
 }
 
 #[tauri::command]
 async fn list_reports() -> Vec<ReportMeta> {
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .parent().unwrap_or(Path::new("."));
+        .parent()
+        .unwrap_or(PathBuf::from("."));
     let reports_dir = root.join("reports");
 
     if !reports_dir.exists() {
         return vec![];
     }
 
-    let mut reports: Vec<ReportMeta> = Vec::new();
-
     let entries = match fs::read_dir(&reports_dir) {
         Ok(e) => e,
         Err(_) => return vec![],
     };
+
+    let mut reports: Vec<ReportMeta> = Vec::new();
 
     for entry in entries.flatten() {
         let path = entry.path();
@@ -90,10 +95,11 @@ async fn delete_report(path: String) -> bool {
 #[tauri::command]
 async fn do_research(input: ResearchInput) -> String {
     let project_root = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .parent().unwrap_or(Path::new("."))
+        .parent()
+        .unwrap_or(PathBuf::from("."))
         .to_path_buf();
 
-    // Try venv python first
+    // Try venv python first, fall back to system python3
     let venv_python = project_root.join(".venv").join("bin").join("python3");
     let python = if venv_python.exists() {
         venv_python

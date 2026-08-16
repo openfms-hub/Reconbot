@@ -9,23 +9,28 @@ jobs:
   build:
     name: Build ReconBot Desktop (macOS)
     runs-on: macos-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build Tauri app
-        uses: tauri-apps/tauri-action@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          args: -- --release
-        env:
-          # Provide a dummy signing key for unsigned builds
-          TAURI_SIGNING_KEY: dummy-key-for-ci
+          node-version: lts/*
 
-      - name: Upload .dmg
-        uses: actions/upload-artifact@v4
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
         with:
-          name: ReconBot-macOS
-          path: src-tauri/target/release/bundle/dmg/*.dmg
-          if-no-files-found: error
-          retention-days: 14
+          targets: aarch64-apple-darwin,x86_64-apple-darwin
+
+      - name: Install frontend dependencies
+        run: cd src-tauri/frontend && npm install
+
+      - name: Build Tauri app
+        uses: tauri-apps/tauri-action@action-v1.0.0
+        with:
+          uploadWorkflowArtifacts: true
+          workflowArtifactNamePattern: 'ReconBot-macOS'
