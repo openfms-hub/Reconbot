@@ -15,8 +15,7 @@
         "height": 800,
         "minWidth": 1000,
         "minHeight": 600,
-        "resizable": true,
-        "path": "index.html"
+        "resizable": true
       }
     ],
     "security": {
