@@ -39,11 +39,35 @@ class LLMConfig:
     default_model: str = "openai/qwen-max"
     temperature: float = 0.3
     max_tokens: int = 8192
-    providers: dict[str, dict[str, str]] = field(default_factory=dict)
+    providers: dict[str, dict[str, Any]] = field(default_factory=dict)
 
-    def get_provider_for_model(self, model: str) -> dict[str, str]:
-        """Return api_key and api_base for a given model name."""
+    def get_provider_for_model(self, model: str) -> dict[str, Any]:
+        """Return api_key and api_base for a given model name.
+
+        Resolution order:
+        1. Fully-qualified format 'provider/model' (e.g. 'dots/dots3-note-prev')
+        2. Match against each provider's declared 'models' list in settings.yaml
+        3. Keyword-based fallback (backward-compatible)
+        """
         model_lower = model.lower()
+
+        # Step 1: fully-qualified format 'provider/model'
+        if "/" in model_lower:
+            provider_name, _ = model_lower.split("/", 1)
+            if provider_name in self.providers:
+                return self.providers[provider_name]
+
+        # Step 2: provider-declared models list
+        for provider_name, provider_cfg in self.providers.items():
+            models_list = provider_cfg.get("models", [])
+            if not isinstance(models_list, list):
+                continue
+            for declared in models_list:
+                d = declared.lower()
+                if model_lower.startswith(d) or d in model_lower:
+                    return provider_cfg
+
+        # Step 3: keyword fallback
         if "qwen" in model_lower:
             return self.providers.get("dashscope", {})
         if "moonshot" in model_lower or "kimi" in model_lower:
@@ -51,6 +75,31 @@ class LLMConfig:
         if "deepseek" in model_lower:
             return self.providers.get("deepseek", {})
         return self.providers.get("dashscope", {})
+
+    def validate_models(self) -> list[str]:
+        """Check for duplicate model declarations across providers.
+        Returns a list of warning messages (empty = no issues).
+        """
+        warnings: list[str] = []
+        model_to_providers: dict[str, list[str]] = {}
+
+        for provider_name, provider_cfg in self.providers.items():
+            models_list = provider_cfg.get("models", [])
+            if not isinstance(models_list, list):
+                continue
+            for declared in models_list:
+                d = declared.lower()
+                model_to_providers.setdefault(d, []).append(provider_name)
+
+        for model_name, providers in model_to_providers.items():
+            if len(providers) > 1:
+                warnings.append(
+                    f"模型 '{model_name}' 被多个 provider 声明: "
+                    f"{', '.join(providers)}。"  # noqa: E501
+                    f"建议使用 'provider/model' 格式明确指定，"
+                    f"例如 '{providers[0]}/{model_name}'。"
+                )
+        return warnings
 
 
 @dataclass
@@ -125,7 +174,16 @@ def load_settings(config_dir: Path | None = None) -> Settings:
         template=output_raw.get("template", "default"),
     )
 
-    return Settings(llm=llm, collectors=collectors, output=output)
+    settings = Settings(llm=llm, collectors=collectors, output=output)
+
+    # Validate model declarations
+    warnings = llm.validate_models()
+    if warnings:
+        import sys
+        for w in warnings:
+            print(f"[reconbot] ⚠ {w}", file=sys.stderr)
+
+    return settings
 
 
 def load_company_profile(config_dir: Path | None = None) -> CompanyProfile:

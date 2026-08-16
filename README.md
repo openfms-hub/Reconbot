@@ -70,11 +70,33 @@ Profiler 和 Matcher 的分析结果通过 Jinja2 模板合并为一份完整的
 
 ## 安装
 
+### 方式一：venv + pip（推荐）
+
 ```bash
 # 克隆项目
 git clone <repo-url> && cd reconbot
 
-# 使用 uv 安装（推荐）
+# 一键安装（创建虚拟环境 + 安装依赖）
+make install
+
+# 激活环境
+source .venv/bin/activate
+
+# 验证安装
+reconbot --help
+```
+
+> 也可直接手动执行：
+> ```bash
+> python3 -m venv .venv
+> source .venv/bin/activate
+> pip install -r requirements.txt
+> pip install -e .
+> ```
+
+### 方式二：uv（可选）
+
+```bash
 uv sync
 ```
 
@@ -86,9 +108,28 @@ uv sync
 llm:
   default_model: "openai/qwen-plus"
   providers:
+    # 每个 provider 通过 models 声明它负责的模型列表
+    # 匹配规则：模型名包含或前缀匹配 models 中的任意项
     dashscope:
       api_key: "your-dashscope-api-key"
       api_base: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+      models: ["qwen-max", "qwen-plus", "qwen-turbo"]
+    moonshot:
+      api_key: "your-moonshot-api-key"
+      api_base: "https://api.moonshot.cn/v1"
+      models: ["moonshot-v1", "kimi"]
+    deepseek:
+      api_key: "your-deepseek-api-key"
+      api_base: "https://api.deepseek.com/v1"
+      models: ["deepseek-chat", "deepseek-coder"]
+    # 新增模型只需添加 provider + models 声明，无需改代码
+    dots:
+      api_key: "your-dots-api-key"
+      api_base: "https://note3-prev-api.askdiandian.com/v1"
+      models: ["dots3-note-prev"]
+
+    > ⚠ **api_base 必须包含版本前缀（如 /v1）**。LiteLLM 会在 api_base 后追加
+    > `/chat/completions`，所以完整 URL 应为 `.../v1/chat/completions`。
 
 collectors:
   website:
@@ -103,6 +144,47 @@ collectors:
 ```
 
 编辑 `config/company_profile.yaml` 填入我方公司信息（产品线、优势、合作偏好），用于合作潜力匹配分析。
+
+### 新增 LLM 模型
+
+ReconBot 使用 **声明式模型路由**：每个 `provider` 通过 `models` 字段声明它负责的模型列表。调用 LLM 时按以下顺序解析：
+
+1. **精确匹配** — 模型名是否被某个 provider 的 `models` 列表包含（或作为前缀）
+2. **关键词兜底** — 含 "qwen" → dashscope，含 "kimi"/"moonshot" → moonshot，含 "deepseek" → deepseek（兼容旧配置）
+
+**新增模型只需两步**（无需改代码）：
+
+1. 在 `settings.yaml` 的 `llm.providers` 下新增一个 provider 块，填写 `api_key`、`api_base` 和 `models`
+2. 兼容 OpenAI Chat Completions 的模型（如 Dots、Claude via API 等）直接可用，无需额外适配
+
+### 模型名称解析规则（优先级从高到低）
+
+| 优先级 | 格式 | 示例 | 说明 |
+|--------|------|------|------|
+| 1 | `provider/model` | `dots/dots3-note-prev` | **推荐**，完全消除歧义 |
+| 2 | 裸模型名 + `models` 匹配 | `dots3-note-prev` | 自动路由到声明了该模型的 provider |
+| 3 | 关键词兜底 | `qwen-max` | 兼容旧配置，自动路由 |
+
+### 多 Provider 模型名冲突处理
+
+如果两个 provider 都声明了同一个模型名，ReconBot 会在启动时输出 **⚠ 警告到 stderr**。
+
+**最佳实践：始终使用 `provider/model` 全限定格式**：
+```bash
+reconbot research "Company" --model dots/dots3-note-prev
+reconbot research "Company" --model dashscope/qwen-max
+```
+
+这样无论 `models` 列表如何配置，路由结果都完全确定。
+```yaml
+llm:
+  default_model: "dots3-note-prev"
+  providers:
+    dots:
+      api_key: "your-dots-api-key"
+      api_base: "https://note3-prev-api.askdiandian.com/v1"
+      models: ["dots3-note-prev"]
+```
 
 ## 使用
 
@@ -138,6 +220,115 @@ reconbot research "Target Company" --model openai/qwen-max
 
 报告自动保存到 `reports/` 目录，文件名格式：`{公司名}_调研报告_{日期}.md`。
 
+### 通过 Makefile 快捷操作
+
+安装好依赖后，可直接使用 `make` 命令：
+
+```bash
+# 查看配置
+make config
+
+# 调研单家公司（设置环境变量）
+COMPANY="Vectro Rastreo" WEBSITE="https://www.vectro.com.mx" COUNTRY="Mexico" make research
+
+# 批量调研
+CSV_FILE=leads.csv make batch
+```
+
+环境变量也可写入 `.env` 文件持久化（不会被提交到 Git）：
+```bash
+echo 'COMPANY="Vectro Rastreo"' > .env
+echo 'WEBSITE="https://www.vectro.com.mx"' >> .env
+make research
+```
+
+## 常见问题与故障排查
+
+### 1. 新增 AI 模型后 LLM 调用失败
+
+| 症状 | 原因 | 解决 |
+|------|------|------|
+| `BadRequestError: LLM Provider NOT provided` | LiteLLM 无法识别裸模型名 | 模型自动加 `openai/` 前缀路由，`api_base` 必须包含 `/v1` |
+| `400: Invalid provider request` | `max_tokens` 值过大，超出 API 限制 | 调低至 `4096`（约 2-3 页报告输出） |
+| `404 page not found` | `api_base` 缺少版本前缀 | `https://xxx.com` → `https://xxx.com/v1` |
+
+**api_base 格式规则：**
+
+```
+api_base: "https://note3-prev-api.askdiandian.com/v1"  ← 包含 /v1
+                                                          ↓
+LiteLLM 拼成: https://note3-prev-api.askdiandian.com/v1/chat/completions
+```
+
+完整示例：
+
+```yaml
+llm:
+  default_model: "dots/dots3-note-prev"    # 全限定名，消除歧义
+  max_tokens: 4096                           # 不要设置过大（512KB 等值会 400）
+  providers:
+    dots:
+      api_key: "your-key"
+      api_base: "https://note3-prev-api.askdiandian.com/v1"  # ← 注意 /v1
+      models: ["dots3-note-prev"]
+```
+
+**模型名解析规则（优先级从高到低）：**
+
+| 优先级 | 格式 | 示例 |
+|--------|------|------|
+| 1 | `provider/model` 全限定名 | `dots/dots3-note-prev` ← **推荐** |
+| 2 | 裸模型名 + `models` 匹配 | `dots3-note-prev` |
+| 3 | 关键词兜底 | `qwen-max` → dashscope |
+
+### 2. 多个 Provider 声明了同名模型
+
+启动时输出警告：
+
+```
+[reconbot] ⚠ 模型 'xxx' 被多个 provider 声明: dots, dashscope。
+  建议使用 'provider/model' 格式明确指定。
+```
+
+**最佳实践：始终使用 `provider/model` 全限定格式**，如：
+```bash
+reconbot research "Company" --model dots/dots3-note-prev
+```
+
+### 3. Arch Linux 环境搭建
+
+```
+bash
+# 安装 Python（Arch 默认不带）
+sudo pacman -S python
+
+# 安装 make（Arch 默认不带）
+sudo pacman -S make
+
+# 验证
+python3 --version
+make --version
+
+# 安装项目
+make install
+```
+
+> 如果 `pacman` 报 404，镜像源未同步，执行 `sudo pacman -Syu` 刷新。
+
+### 4. 快速验证 LLM 配置是否正确
+
+```bash
+# 激活环境后
+source .venv/bin/activate
+
+# 查看配置（验证 API Key 是否已加载）
+reconbot config
+
+# 如果显示 API Key 已配置，即可正常调研
+```
+
+---
+
 ## 项目结构
 
 ```
@@ -145,6 +336,8 @@ reconbot/
 ├── config/
 │   ├── settings.yaml          # 全局配置（LLM、采集器、输出）
 │   └── company_profile.yaml   # 我方公司 Profile
+├── requirements.txt           # pip 依赖清单
+├── Makefile                   # 快捷命令（install / research / batch）
 ├── src/reconbot/
 │   ├── cli.py                 # Typer CLI 入口
 │   ├── config.py              # 配置加载
